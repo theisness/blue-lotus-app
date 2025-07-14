@@ -37,12 +37,27 @@ class HomePage extends StatelessWidget {
             textStyle: Styles.ts_0089FF_10sp_semibold,
           ),
         ),
+        // 影院页
         PersistentTabConfig(
-          screen: DiscoverPage(),
+          screen: DiscoverPage(
+              url: 'https://ssbx.site'
+          ),
           item: ItemConfig(
-            icon: ImageRes.homeTab3Sel.toImage,
-            inactiveIcon: ImageRes.homeTab3Nor.toImage,
-            title: StrRes.workbench,
+            icon: ImageRes.tabMovieSel.toImage,
+            inactiveIcon: ImageRes.tabMovieNor.toImage,
+            title: StrRes.movie,
+            textStyle: Styles.ts_0089FF_10sp_semibold,
+          ),
+        ),
+        // 社区页
+        PersistentTabConfig(
+          screen: DiscoverPage(
+            url:'https://blog.ssbx.site'
+          ),
+          item: ItemConfig(
+            icon: ImageRes.tabDiscourseSel.toImage,
+            inactiveIcon: ImageRes.tabDiscourseNor.toImage,
+            title: StrRes.discourse,
             textStyle: Styles.ts_0089FF_10sp_semibold,
           ),
         ),
@@ -74,6 +89,43 @@ class HomePage extends StatelessWidget {
     );
   }
 
+  // final PersistentTabController _controller = PersistentTabController(initialIndex: 0);
+  //
+  // @override
+  // Widget build(BuildContext context) {
+  //   return PopScope(
+  //     canPop: false, // 禁止直接 pop
+  //     onPopInvokedWithResult: (bool didPop, result) async {
+  //       if(didPop) return;
+  //       if (_controller.index != 0) {
+  //         _controller.jumpToTab(0); // 切换到首页 tab
+  //       } else {
+  //         // 如果已经在首页 tab，允许 pop
+  //         Navigator.of(context).pop();
+  //       }
+  //     },
+  //     child: Scaffold(
+  //       backgroundColor: Styles.c_FFFFFF,
+  //       body: Obx(
+  //             () => PersistentTabView(
+  //           controller: _controller,
+  //           tabs: _tabs(),
+  //           navBarBuilder: (navBarConfig) => Style6BottomNavBar(
+  //             navBarConfig: navBarConfig,
+  //             navBarDecoration: const NavBarDecoration(
+  //               color: Colors.white,
+  //               boxShadow: [
+  //                 BoxShadow(color: Colors.black12, blurRadius: 0.5, spreadRadius: 0.5),
+  //               ],
+  //             ),
+  //           ),
+  //           navBarOverlap: const NavBarOverlap.none(),
+  //           screenTransitionAnimation: const ScreenTransitionAnimation.none(),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,7 +133,7 @@ class HomePage extends StatelessWidget {
       body: Obx(
         () => PersistentTabView(
           tabs: _tabs(),
-          navBarBuilder: (navBarConfig) => Style1BottomNavBar(
+          navBarBuilder: (navBarConfig) => Style2BottomNavBar(
             navBarConfig: navBarConfig,
             navBarDecoration: const NavBarDecoration(
               color: Colors.white,

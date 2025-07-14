@@ -18,7 +18,7 @@ class DiscoverLogic extends GetxController {
     if (temp == null) {
       appLogic.queryClientConfig().then((value) {
         if (value['discoverPageURL'] == null) {
-          url.value = 'https://www.openim.io';
+          url.value = 'https://ssbx.site';
         } else {
           url.value = value['discoverPageURL'];
         }

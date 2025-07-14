@@ -102,7 +102,9 @@ class StrRes {
 
   static String get contacts => 'contacts'.tr;
 
-  static String get workbench => 'workbench'.tr;
+  static String get movie => 'movie'.tr;
+
+  static String get discourse => 'discourse'.tr;
 
   static String get mine => 'mine'.tr;
 

@@ -78,7 +78,7 @@
 
     <application
         android:icon="@mipmap/ic_launcher"
-        android:label="F-DEMO"
+        android:label="蓝莲花"
         android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true"
         tools:replace="android:label">

@@ -250,7 +250,7 @@ class TitleBar extends StatelessWidget implements PreferredSizeWidget {
   })  : height = 44.h,
         backgroundColor = Styles.c_FFFFFF,
         center = null,
-        left = StrRes.workbench.toText..style = Styles.ts_0C1C33_20sp_semibold,
+        left = StrRes.movie.toText..style = Styles.ts_0C1C33_20sp_semibold,
         right = null;
 
   TitleBar.search({

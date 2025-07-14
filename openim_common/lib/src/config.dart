@@ -49,7 +49,7 @@ class Config {
 
   static const double textScaleFactor = 1.0;
 
-  static const discoverPageURL = 'https://docs.openim.io/';
+  static const discoverPageURL = 'https://ssbx.site';
   static const allowSendMsgNotFriend = '1';
   // amap key
   static const webKey = 'webKey';
@@ -65,7 +65,7 @@ class Config {
   static const friendScheme = "io.openim.app/addFriend/";
   static const groupScheme = "io.openim.app/joinGroup/";
 
-  static const _host = "your-server-ip or your-domain";
+  static const _host = "chat.ssbx.site";
 
   static const _ipRegex = '((2[0-4]\\d|25[0-5]|[01]?\\d\\d?)\\.){3}(2[0-4]\\d|25[0-5]|[01]?\\d\\d?)';
 

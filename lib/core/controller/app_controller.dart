@@ -26,9 +26,13 @@ class AppController extends GetxController with UpgradeManger {
   final initializationSettingsAndroid = const AndroidInitializationSettings('@mipmap/ic_launcher');
 
   final DarwinInitializationSettings initializationSettingsDarwin = const DarwinInitializationSettings(
-    requestAlertPermission: false,
-    requestBadgePermission: false,
-    requestSoundPermission: false,
+    requestAlertPermission: true,
+    requestBadgePermission: true,
+    requestSoundPermission: true,
+    requestCriticalPermission: true,
+    defaultPresentAlert: true,
+    defaultPresentBadge: true,
+    defaultPresentSound: true,
   );
 
   RTCBridge? get rtcBridge => PackageBridge.rtcBridge;
@@ -67,13 +71,18 @@ class AppController extends GetxController with UpgradeManger {
   @override
   void onInit() async {
     _initPlayer();
+    await _configureBackgroundTasks();
     final initializationSettings = InitializationSettings(
       android: initializationSettingsAndroid,
       iOS: initializationSettingsDarwin,
     );
     await flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: (notificationResponse) {},
+      onDidReceiveNotificationResponse: (NotificationResponse response) {
+        if (response.payload != null) {
+          _handleNotificationClick(response.payload!);
+        }
+      },
     );
 
     autoCheckVersionUpgrade();
@@ -121,15 +130,45 @@ class AppController extends GetxController with UpgradeManger {
     if (!isRunningBackground) {
       _playMessageSound();
     } else {
+      final id = seq;
+      
       if (Platform.isAndroid) {
-        final id = seq;
-
-        const androidPlatformChannelSpecifics = AndroidNotificationDetails('chat', 'OpenIM聊天消息',
-            channelDescription: '来自OpenIM的信息', importance: Importance.max, priority: Priority.high, ticker: 'ticker');
-        const NotificationDetails platformChannelSpecifics =
-            NotificationDetails(android: androidPlatformChannelSpecifics);
-        await flutterLocalNotificationsPlugin.show(id, '您收到了一条新消息', '消息内容：.....', platformChannelSpecifics,
-            payload: '');
+        const androidPlatformChannelSpecifics = AndroidNotificationDetails(
+          'chat', 
+          'OpenIM聊天消息',
+          channelDescription: '来自OpenIM的信息', 
+          importance: Importance.max, 
+          priority: Priority.high, 
+          ticker: 'ticker'
+        );
+        const NotificationDetails platformChannelSpecifics = NotificationDetails(
+          android: androidPlatformChannelSpecifics
+        );
+        await flutterLocalNotificationsPlugin.show(
+          id, 
+          '您收到了一条新消息', 
+          '消息内容：.....', 
+          platformChannelSpecifics,
+          payload: ''
+        );
+      } else if (Platform.isIOS) {
+        const iOSPlatformChannelSpecifics = DarwinNotificationDetails(
+          presentAlert: true,    // 显示通知
+          presentBadge: true,    // 显示角标
+          presentSound: true,    // 播放声音
+          sound: 'message_ring.wav', // 自定义通知声音
+          badgeNumber: 1,        // 角标数量
+        );
+        const NotificationDetails platformChannelSpecifics = NotificationDetails(
+          iOS: iOSPlatformChannelSpecifics
+        );
+        await flutterLocalNotificationsPlugin.show(
+          id, 
+          '您收到了一条新消息', 
+          '消息内容：.....', 
+          platformChannelSpecifics,
+          payload: ''
+        );
       }
     }
   }
@@ -284,5 +323,45 @@ class AppController extends GetxController with UpgradeManger {
     clientConfigMap.assignAll(map);
 
     return clientConfigMap;
+  }
+
+  Future<void> _configureBackgroundTasks() async {
+    if (Platform.isIOS) {
+      await flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
+          ?.requestPermissions(
+            alert: true,
+            badge: true,
+            sound: true,
+            critical: true,
+          );
+    }
+  }
+
+  void _handleNotificationClick(String payload) {
+    // 根据 payload 处理不同的通知点击事件
+    // 例如：跳转到特定聊天页面
+  }
+
+  Future<void> _checkNotificationPermission() async {
+    if (Platform.isIOS) {
+      final settings = await flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
+          ?.requestPermissions(
+            alert: true,
+            badge: true,
+            sound: true,
+            critical: true,
+          );
+    }
+  }
+
+  void _debugNotificationSettings() async {
+    if (Platform.isIOS) {
+      final settings = await flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
+          ?.getNotificationAppLaunchDetails();
+      print('Notification settings: $settings');
+    }
   }
 }

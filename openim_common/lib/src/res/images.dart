@@ -7,19 +7,24 @@ class ImageRes {
   static const voiceBlueAnim = "assets/anim/voice_blue.json";
   static const voiceBlackAnim = "assets/anim/voice_black.json";
 
-  static const splashLogo = "$_dir/ic_splash_logo.webp";
-  static const loginLogo = "$_dir/ic_login_logo.webp";
+  static const splashLogo = "$_dir/ic_splash_logo.png";
+  static const loginLogo = "$_dir/ic_login_logo.png";
   static const eyeOpen = "$_dir/ic_eye_open.webp";
   static const eyeClose = "$_dir/ic_eye_close.webp";
   static const clearText = "$_dir/ic_clear_text.webp";
-  static const homeTab1Nor = "$_dir/ic_home_tab1_nor.webp";
+  static const homeTab1Nor = "$_dir/chat-nor.png";
   static const homeTab2Nor = "$_dir/ic_home_tab2_nor.webp";
   static const homeTab3Nor = "$_dir/ic_home_tab3_nor.webp";
   static const homeTab4Nor = "$_dir/ic_home_tab4_nor.webp";
-  static const homeTab1Sel = "$_dir/ic_home_tab1_sel.webp";
+  static const homeTab1Sel = "$_dir/chat-sel.png";
   static const homeTab2Sel = "$_dir/ic_home_tab2_sel.webp";
   static const homeTab3Sel = "$_dir/ic_home_tab3_sel.webp";
   static const homeTab4Sel = "$_dir/ic_home_tab4_sel.webp";
+  static const tabDiscourseNor = "$_dir/forum-nor.png";
+  static const tabDiscourseSel = "$_dir/forum-sel.png";
+  static const tabMovieNor = "$_dir/movie-nor.png";
+  static const tabMovieSel = "$_dir/movie-sel.png";
+
   static const searchGrey = "$_dir/ic_search_gery.webp";
   static const callBack = "$_dir/ic_call_black.webp";
   static const addBlack = "$_dir/ic_add_black.webp";

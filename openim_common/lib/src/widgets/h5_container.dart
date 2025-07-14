@@ -90,7 +90,7 @@ Page resource error:
           );
         },
       )
-      ..loadRequest(Uri.parse('https://openim.io'));
+      ..loadRequest(Uri.parse(widget.url));
 
     if (!Platform.isMacOS) {
       controller.setBackgroundColor(const Color(0x80000000));
@@ -114,7 +114,10 @@ Page resource error:
     Logger.print('H5Container: ${widget.url}');
     return Scaffold(
       appBar: widget.title != null ? TitleBar.back(title: widget.title) : null,
-      body: Stack(
+      // body: SafeArea(
+      //   child: WebViewWidget(controller: _controller),
+      // ),
+      body: SafeArea( child:Stack(
         children: [
           WebViewWidget(controller: _controller),
           progress < 1.0
@@ -123,8 +126,8 @@ Page resource error:
                   color: Colors.blue,
                 )
               : const SizedBox(),
-        ],
-      ),
+        ]),
+      )
     );
   }
 }
