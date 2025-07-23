@@ -261,7 +261,10 @@ class ChatPage extends StatelessWidget {
                     onScrollToTop: logic.onScrollToTop,
                     itemBuilder: (_, index) {
                       final message = logic.indexOfMessage(index);
-                      return Obx(() => _buildItemView(message));
+                      return Obx(() => Container(
+                        key: logic.getMessageKey(message),
+                        child: _buildItemView(message),
+                      ));
                     },
                   ),
                 ),

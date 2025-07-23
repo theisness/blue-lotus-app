@@ -110,6 +110,9 @@ class ChatLogic extends SuperController {
   String? groupOwnerID;
 
   final _pageSize = 40;
+  
+  // 用于获取消息项实际高度的GlobalKey映射
+  final Map<String, GlobalKey> _messageKeys = <String, GlobalKey>{};
 
   RTCBridge? get rtcBridge => PackageBridge.rtcBridge;
 
@@ -150,6 +153,239 @@ class ChatLogic extends SuperController {
     });
   }
 
+  Future<void> _locateToMessage(Message targetMessage) async {
+    Logger.print('开始定位到消息: ${targetMessage.clientMsgID}');
+    
+    // 首先检查目标消息是否已在当前列表中
+    int index = messageList.indexWhere((msg) => msg.clientMsgID == targetMessage.clientMsgID);
+    
+    // 如果消息不在当前列表中，需要加载历史消息
+    if (index == -1) {
+      Logger.print('目标消息不在当前列表中，开始加载历史消息');
+      
+      // 显示加载提示
+      IMViews.showToast('正在加载历史消息...');
+      
+      // 循环加载历史消息，直到找到目标消息或没有更多消息
+      int loadCount = 0;
+      const maxLoadAttempts = 20; // 最多尝试加载20次，避免无限循环
+      
+      while (index == -1 && loadCount < maxLoadAttempts) {
+        loadCount++;
+        Logger.print('第 $loadCount 次尝试加载历史消息');
+        
+        // 加载历史消息
+        final result = await _fetchHistoryMessages();
+        if (result.messageList == null || result.messageList!.isEmpty) {
+          Logger.print('没有更多历史消息');
+          break;
+        }
+        
+        // 添加新消息到列表开头
+        final newMessages = result.messageList!;
+        newMessages.removeWhere((msg) => _isBeDeleteMessage(msg));
+        messageList.insertAll(0, newMessages);
+        
+        // 重新查找目标消息
+        index = messageList.indexWhere((msg) => msg.clientMsgID == targetMessage.clientMsgID);
+        
+        // 如果到达消息末尾，停止加载
+        if (result.isEnd == true) {
+          Logger.print('已到达消息末尾');
+          break;
+        }
+      }
+      
+      if (index == -1) {
+        Logger.print('无法找到目标消息，可能已被删除');
+        IMViews.showToast('未找到目标消息，可能已被删除');
+        return;
+      }
+    }
+    
+    // 找到目标消息，滚动到对应位置
+    Logger.print('找到目标消息，位置: $index');
+    
+    // 使用精确的滚动定位方法
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToMessageAtIndex(index);
+    });
+    
+    // 高亮显示目标消息（可以通过设置一个标记来实现）
+    // 这里可以添加高亮逻辑
+  }
+  
+  /// 精确滚动到指定索引的消息
+  void _scrollToMessageAtIndex(int targetIndex) {
+    try {
+      // 确保索引在有效范围内
+      if (targetIndex < 0 || targetIndex >= messageList.length) {
+        Logger.print('目标索引超出范围: $targetIndex, 总消息数: ${messageList.length}');
+        IMViews.showToast('定位失败：索引超出范围');
+        return;
+      }
+      
+      Logger.print('开始精确滚动到索引: $targetIndex');
+      
+      // 使用GlobalKey来获取实际控件高度
+      _scrollToMessageWithActualHeight(targetIndex);
+      
+    } catch (e) {
+      Logger.print('滚动定位出错: $e');
+      _scrollToMessageAtIndexFallback(targetIndex);
+    }
+  }
+  
+  /// 使用实际控件高度滚动到指定消息
+  void _scrollToMessageWithActualHeight(int targetIndex) {
+    if (targetIndex < 0 || targetIndex >= messageList.length) return;
+    
+    final targetMessage = messageList[targetIndex];
+    final clientMsgID = targetMessage.clientMsgID ?? '';
+    
+    // 等待下一帧，确保所有控件都已渲染
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _calculateAndScrollToMessage(targetIndex, clientMsgID);
+    });
+  }
+  
+  /// 计算并滚动到消息的实际位置
+  void _calculateAndScrollToMessage(int targetIndex, String clientMsgID) {
+    try {
+      // 获取目标消息的GlobalKey
+      final targetKey = _messageKeys[clientMsgID];
+      if (targetKey == null) {
+        Logger.print('未找到目标消息的GlobalKey: $clientMsgID');
+        _scrollToMessageAtIndexFallback(targetIndex);
+        return;
+      }
+      
+      // 获取目标消息的RenderBox
+      final RenderBox? targetRenderBox = targetKey.currentContext?.findRenderObject() as RenderBox?;
+      if (targetRenderBox == null) {
+        Logger.print('无法获取目标消息的RenderBox');
+        _scrollToMessageAtIndexFallback(targetIndex);
+        return;
+      }
+      
+      // 获取ListView的RenderBox
+      final RenderBox? listViewRenderBox = scrollController.position.context.notificationContext?.findRenderObject() as RenderBox?;
+      if (listViewRenderBox == null) {
+        Logger.print('无法获取ListView的RenderBox');
+        _scrollToMessageAtIndexFallback(targetIndex);
+        return;
+      }
+      
+      // 计算目标消息在ListView中的位置
+      final targetPosition = targetRenderBox.localToGlobal(Offset.zero, ancestor: listViewRenderBox);
+      
+      // 计算需要滚动的距离
+      final currentOffset = scrollController.offset;
+      final viewportHeight = scrollController.position.viewportDimension;
+      
+      // 计算目标位置（考虑reverse ListView的特性）
+      double scrollOffset = currentOffset + targetPosition.dy - (viewportHeight * 0.3);
+      
+      // 确保滚动位置在有效范围内
+      final maxScrollExtent = scrollController.position.maxScrollExtent;
+      scrollOffset = scrollOffset.clamp(0.0, maxScrollExtent);
+      
+      Logger.print('实际高度计算 - 当前偏移: $currentOffset, 目标位置: ${targetPosition.dy}, 计算滚动: $scrollOffset');
+      
+      // 平滑滚动到目标位置
+      scrollController.animateTo(
+        scrollOffset,
+        duration: Duration(milliseconds: 800),
+        curve: Curves.easeInOut,
+      ).then((_) {
+        IMViews.showToast('已定位到目标消息');
+        _highlightTargetMessage(targetIndex);
+      });
+      
+    } catch (e) {
+      Logger.print('使用实际高度计算滚动位置失败: $e');
+      _scrollToMessageAtIndexFallback(targetIndex);
+    }
+  }
+  
+  /// 根据消息类型获取预估高度
+  double _getEstimatedMessageHeight(int messageIndex) {
+    if (messageIndex < 0 || messageIndex >= messageList.length) {
+      return 100.0; // 默认高度
+    }
+    
+    final message = messageList[messageIndex];
+    final contentType = message.contentType;
+    
+    switch (contentType) {
+      case MessageType.text:
+        final text = message.textElem?.content ?? '';
+        // 根据文本长度估算高度
+        if (text.length < 20) return 60.0;
+        if (text.length < 50) return 80.0;
+        if (text.length < 100) return 100.0;
+        return 120.0;
+        
+      case MessageType.picture:
+        return 200.0; // 图片消息通常较高
+        
+      case MessageType.video:
+        return 180.0; // 视频消息
+        
+      case MessageType.voice:
+        return 60.0; // 语音消息通常较矮
+        
+      case MessageType.file:
+        return 80.0; // 文件消息
+        
+      case MessageType.location:
+        return 150.0; // 位置消息
+        
+      case MessageType.quote:
+        return 120.0; // 引用消息
+        
+      case MessageType.card:
+        return 100.0; // 名片消息
+        
+      default:
+        return 100.0; // 默认高度
+    }
+  }
+  
+  /// 备用滚动方法
+  void _scrollToMessageAtIndexFallback(int targetIndex) {
+    try {
+      // 使用简单的索引滚动方法
+      final itemCount = messageList.length;
+      final targetItem = itemCount - targetIndex - 1; // 转换为从底部的索引
+      
+      Logger.print('使用备用方法滚动到项目: $targetItem (总项目数: $itemCount)');
+      
+      // 使用jumpTo进行快速定位，然后微调
+      final estimatedPosition = targetItem * 100.0; // 简单估算
+      scrollController.jumpTo(estimatedPosition);
+      
+      // 延迟后显示提示
+      Future.delayed(Duration(milliseconds: 100), () {
+        IMViews.showToast('已定位到目标消息');
+      });
+    } catch (e) {
+      Logger.print('备用滚动方法也失败: $e');
+      IMViews.showToast('定位失败，请手动滚动查看');
+    }
+  }
+  
+  /// 高亮目标消息
+  void _highlightTargetMessage(int targetIndex) {
+    // 这里可以添加高亮逻辑
+    // 例如：设置一个标记，让对应的消息项显示高亮效果
+    Logger.print('高亮目标消息，索引: $targetIndex');
+    
+    // 可以在这里实现高亮效果
+    // 比如：设置一个observable变量来标记高亮的消息
+    // highlightedMessageIndex.value = targetIndex;
+  }
+
   Future<List<Message>> searchMediaMessage() async {
     final messageList = await OpenIM.iMManager.messageManager.searchLocalMessages(
         conversationID: conversationInfo.conversationID,
@@ -169,6 +405,14 @@ class ChatLogic extends SuperController {
     scrollController.addListener(() {
       focusNode.unfocus();
     });
+    
+    // 如果有搜索消息，定位到该消息
+    if (searchMessage != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await _locateToMessage(searchMessage!);
+      });
+    }
+    
     super.onReady();
   }
 
@@ -1813,6 +2057,15 @@ class ChatLogic extends SuperController {
   }
 
   void joinMeeting(Message msg) {}
+  
+  /// 获取消息项的GlobalKey
+  GlobalKey getMessageKey(Message message) {
+    final clientMsgID = message.clientMsgID ?? '';
+    if (!_messageKeys.containsKey(clientMsgID)) {
+      _messageKeys[clientMsgID] = GlobalKey();
+    }
+    return _messageKeys[clientMsgID]!;
+  }
 
   @override
   void onDetached() {}

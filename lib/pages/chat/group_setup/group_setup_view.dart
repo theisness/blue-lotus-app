@@ -26,10 +26,15 @@ class GroupSetupPage extends StatelessWidget {
                   _buildItemView(
                     text: StrRes.groupManage,
                     showRightArrow: true,
-                    isBottomRadius: true,
                     onTap: logic.groupManage,
                   ),
-                  10.verticalSpace,
+                _buildItemView(
+                  text: '消息查询',
+                  showRightArrow: true,
+                  isBottomRadius: !logic.isOwner,
+                  onTap: logic.searchMessages,
+                ),
+                10.verticalSpace,
        
                 _buildItemView(
                   text: StrRes.messageNotDisturb,

@@ -379,4 +379,11 @@ class AppNavigator {
       });
 
   static startSelectContactsFromTag() => Get.toNamed(AppRoutes.selectContactsFromTag);
+
+  static Future<T?>? startMessageSearch<T>({
+    required ConversationInfo conversationInfo,
+  }) =>
+      Get.toNamed(AppRoutes.messageSearch, arguments: {
+        'conversationInfo': conversationInfo,
+      });
 }

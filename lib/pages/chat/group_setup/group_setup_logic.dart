@@ -435,4 +435,18 @@ class GroupSetupLogic extends GetxController {
         faceURL: membersInfo.faceURL,
         groupID: membersInfo.groupID,
       );
+
+  void searchMessages() async {
+    final result = await AppNavigator.startMessageSearch(
+      conversationInfo: conversationInfo.value,
+    );
+    
+    // 如果用户选择了某条消息，跳转到聊天页面并定位到该消息
+    if (result is Message) {
+      await AppNavigator.startChat(
+        conversationInfo: conversationInfo.value,
+        searchMessage: result,
+      );
+    }
+  }
 }

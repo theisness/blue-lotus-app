@@ -18,6 +18,10 @@ import '../pages/chat/group_setup/group_qrcode/group_qrcode_binding.dart';
 import '../pages/chat/group_setup/group_qrcode/group_qrcode_view.dart';
 import '../pages/chat/group_setup/group_setup_binding.dart';
 import '../pages/chat/group_setup/group_setup_view.dart';
+import '../pages/chat/message_search/message_search_binding.dart';
+import '../pages/chat/message_search/message_search_view.dart';
+import '../pages/chat/message_search/message_search_results_binding.dart';
+import '../pages/chat/message_search/message_search_results_view.dart';
 import '../pages/chat/oa_notification/oa_notification_binding.dart';
 import '../pages/chat/oa_notification/oa_notification_view.dart';
 import '../pages/contacts/add_by_search/add_by_search_binding.dart';
@@ -386,6 +390,16 @@ class AppPages {
       name: AppRoutes.oaNotificationList,
       page: () => OANotificationPage(),
       binding: OANotificationBinding(),
+    ),
+    _pageBuilder(
+      name: AppRoutes.messageSearch,
+      page: () => MessageSearchPage(),
+      binding: MessageSearchBinding(),
+    ),
+    _pageBuilder(
+      name: AppRoutes.messageSearchResults,
+      page: () => MessageSearchResultsPage(),
+      binding: MessageSearchResultsBinding(),
     ),
   ];
 }

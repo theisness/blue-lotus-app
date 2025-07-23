@@ -56,6 +56,8 @@ abstract class AppRoutes {
   static const resetPassword = '/reset_password';
   static const selectContactsFromTag = '/select_contacts_from_tag';
   static const oaNotificationList = "/oa_notification_list";
+  static const messageSearch = "/message_search";
+  static const messageSearchResults = "/message_search_results";
 }
 
 extension RoutesExtension on String {
