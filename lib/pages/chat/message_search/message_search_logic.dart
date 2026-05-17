@@ -236,8 +236,6 @@ class MessageSearchLogic extends GetxController {
       return;
     }
     
-
-    
     // 处理日期范围，如果没有选择则使用默认值
     int startTime = 0;
     int peroid = 0;

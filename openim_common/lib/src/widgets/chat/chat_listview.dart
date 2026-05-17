@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:openim_common/openim_common.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 extension ScrollControllerExt on ScrollController {
   Future scrollToBottom(Function()? onScrollStop) async {
@@ -238,6 +239,8 @@ class ChatListView extends StatefulWidget {
     this.onScrollToTopLoad,
     this.onScrollToBottom,
     this.onScrollToTop,
+    this.itemScrollController,
+    this.itemPositionsListener,
   }) : super(key: key);
   final ScrollController? controller;
   final ScrollPhysics? physics;
@@ -252,6 +255,10 @@ class ChatListView extends StatefulWidget {
 
   final bool enabledScrollTopLoad;
   final Function()? onTouch;
+  
+  // 新增ScrollablePositionedList相关参数
+  final ItemScrollController? itemScrollController;
+  final ItemPositionsListener? itemPositionsListener;
 
   @override
   State<ChatListView> createState() => _ChatListViewState();
