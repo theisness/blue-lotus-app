@@ -2,3 +2,17 @@
 /.flutter-plugins-dependencies
 /.packages
 /.dart_tool/
+
+# Build output
+/build/
+
+# IDE
+.idea/
+*.iml
+
+# OS
+.DS_Store
+
+# Flutter generated (machine-specific, do not commit)
+**/ephemeral/
+macos/Flutter/GeneratedPluginRegistrant.swift
